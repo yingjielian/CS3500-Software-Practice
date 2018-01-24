@@ -1,9 +1,11 @@
 ﻿// Skeleton written by Joe Zachary for CS 3500, January 2017
-
 using System;
 using System.Collections.Generic;
 using System.Text.RegularExpressions;
-
+/// <summary>
+/// Yingjie Lian
+/// U1058784
+/// </summary>
 namespace Formulas
 {
     /// <summary>
