@@ -17,17 +17,17 @@ namespace Formulas
     /// </summary>
     public class Formula
     {
-        ///NBA
-        ///sda
-        ///s
-        ///sd
-        ///as
+        ///sada
+        ///sada
+        ///dsa
         ///das
-        ///da
-        ///sd
+        ///d
+        ///asd
+        ///asd
         ///a
-        ///sdsa
-        ///da
+        ///das
+        ///das
+        ///
         ///
         /// <summary>
         /// Creates a Formula from a string that consists of a standard infix expression composed
