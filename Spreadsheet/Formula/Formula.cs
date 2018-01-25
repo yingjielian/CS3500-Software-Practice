@@ -39,6 +39,14 @@ namespace Formulas
         /// </summary>
         public Formula(String formula)
         {
+            int a;
+            int b;
+
+            foreach (string any in GetTokens(formula))
+                {
+                string test = any;
+                }
+                
         }
         /// <summary>
         /// Evaluates this Formula, using the Lookup delegate to determine the values of variables.  (The
