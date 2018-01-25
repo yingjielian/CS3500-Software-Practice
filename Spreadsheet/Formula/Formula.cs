@@ -17,6 +17,7 @@ namespace Formulas
     /// </summary>
     public class Formula
     {
+        ///NBA
         /// <summary>
         /// Creates a Formula from a string that consists of a standard infix expression composed
         /// from non-negative floating-point numbers (using C#-like syntax for double/int literals), 
