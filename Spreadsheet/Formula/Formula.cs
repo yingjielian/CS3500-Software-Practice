@@ -42,6 +42,7 @@ namespace Formulas
         {
             int openParen = 0;
             int closeParen = 0;
+            double checkDigit = 0.0;
             this.list = new List<string>();
 
             string previousToken = null;
@@ -66,22 +67,29 @@ namespace Formulas
 
                 //The first token of a formula must be a number, a variable, or an opening parenthesis.
                 if (firstTimeLoop)
-                    if ( !Regex.IsMatch(token, @"^[a-zA-Z][0-9a-zA-Z]*$") || token != "(")
+                {
+                    if (!Regex.IsMatch(token, @"^[a-zA-Z][0-9a-zA-Z]*$") && token != "(" && !Double.TryParse(token, out checkDigit))
+                    {
                         throw new FormulaFormatException("Error, formula doesn't begin appropriately.");
-
-
+                    }
+                }
                 //The last token of a formula must be a number, a variable, or a closing parenthesis.
 
                 //Any token that immediately follows an opening parenthesis or an operator must be either a number, a variable, or an opening parenthesis.
 
-                //Any token that immediately follows a number, a variable, or a closing parenthesis must be either an operator or a closing parenthesis.
-                if(previousToken == "(" || Regex.IsMatch(previousToken, @"^[\+\-*/]$"))
-                    if(!Regex.IsMatch(token, @" ^[a-zA-Z][0-9a-zA-Z]*$") || token != "(")
-                        throw new FormulaFormatException("error: unexpected character after an opening parenthesis or operator.");
 
-                if(Regex.IsMatch(previousToken, @"^[a-zA-Z][0-9a-zA-Z]*$") || previousToken == ")")
-                    if(!Regex.IsMatch(token, @"^[\+\-*/]$") || token != ")")
-                        throw new FormulaFormatException("error: unexpected character after a number, a variable, or a closing parenthesis.");
+                //Any token that immediately follows a number, a variable, or a closing parenthesis must be either an operator or a closing parenthesis.
+                else
+                {
+                    if (previousToken == "(" || Regex.IsMatch(previousToken, @"^[\+\-*/]$"))
+                        if (!Regex.IsMatch(token, @" ^[a-zA-Z][0-9a-zA-Z]*$") && (token != "(") && !Double.TryParse(token, out checkDigit))
+                            throw new FormulaFormatException("error: unexpected character after an opening parenthesis or operator.");
+
+                    if (Regex.IsMatch(previousToken, @"^[a-zA-Z][0-9a-zA-Z]*$") || previousToken == ")" || Double.TryParse(previousToken, out checkDigit))
+                        if (!Regex.IsMatch(token, @"^[\+\-*/]$") && token != ")")
+                            throw new FormulaFormatException("error: unexpected character after a number, a variable, or a closing parenthesis.");
+                }
+
 
                 previousToken = token;
 
@@ -91,7 +99,7 @@ namespace Formulas
             }
 
             
-            if(!Regex.IsMatch(previousToken, @"^[a-zA-Z][0-9a-zA-Z]*$") || previousToken != ")")
+            if(!Regex.IsMatch(previousToken, @"^[a-zA-Z][0-9a-zA-Z]*$") && previousToken != ")" && !Double.TryParse(previousToken, out checkDigit))
                 throw new FormulaFormatException("Error, formula doesn't end appropriately.");
 
             if (closeParen != openParen)
@@ -112,30 +120,34 @@ namespace Formulas
         {
             Stack<string> operatorStack = new Stack<string>();
             Stack<string> valueStack = new Stack<string>();
+      
+            double tokenNumber = 0.0;
+            string previousToken = null;
 
-            double number = 0.0;
-
-        
             foreach (string token in list)
             {
-                if (Double.TryParse(token, out number))
-                { if (operatorStack.Peek() == "*" || operatorStack.Peek() == "/")
+                if (Double.TryParse(token, out tokenNumber))
+                {
+                    if ((operatorStack.Count != 0) && (operatorStack.Peek() == "*" || operatorStack.Peek() == "/"))
                     {
                         string operators = operatorStack.Pop();
                         double poppedValue = 0.0;
                         Double.TryParse(valueStack.Pop(), out poppedValue);
 
                         if (operators == "*")
-                            return poppedValue * number;
+                            valueStack.Push((poppedValue * tokenNumber).ToString());
                         else if (operators == "/")
                         {
-                            return poppedValue / number;
+                            valueStack.Push((poppedValue / tokenNumber).ToString());
                         }
 
                     }
+                    else
+                    {
+                        valueStack.Push(token);
+                    }
                 }
-                else
-                    valueStack.Push(token);
+                
 
                 if(Regex.IsMatch(token, @"^[a-zA-Z][0-9a-zA-Z]*$"))
                 {
@@ -146,14 +158,99 @@ namespace Formulas
                     }
                     catch(UndefinedVariableException e)
                     {
-                        throw new FormulaEvaluationException("");
+                        throw new FormulaEvaluationException("This is undefined.");
                     }
                 }
 
+                if(token == "+" || token == "-")
+                {
+                    if((operatorStack.Count != 0) && (operatorStack.Peek() == "+" || operatorStack.Peek() == "-"))
+                    {
+                        string operators = operatorStack.Pop();
+                        double firstPoppedValue = 0.0;
+                        double secondPoppedValue = 0.0;
+                        Double.TryParse(valueStack.Pop(), out firstPoppedValue);
+                        Double.TryParse(valueStack.Pop(), out secondPoppedValue);
 
+                        if (operators == "+")
+                            valueStack.Push((firstPoppedValue + secondPoppedValue).ToString());
+                        else if(operators == "-")
+                            valueStack.Push((secondPoppedValue - firstPoppedValue).ToString());
+                    }
+
+                    operatorStack.Push(token);
+                }
+                
+                if(token == "*" || token == "/")
+                {
+                    operatorStack.Push(token);
+                }
+
+                if(token == "(")
+                {
+                    operatorStack.Push(token);
+                }
+
+                if(token == ")")
+                {
+                    if (operatorStack.Peek() == "+" || operatorStack.Peek() == "-")
+                    {
+                        string operators = operatorStack.Pop();
+                        double firstPoppedValue = 0.0;
+                        double secondPoppedValue = 0.0;
+                        Double.TryParse(valueStack.Pop(), out firstPoppedValue);
+                        Double.TryParse(valueStack.Pop(), out secondPoppedValue);
+
+                        if (operators == "+")
+                            valueStack.Push((firstPoppedValue + secondPoppedValue).ToString());
+                        else if (operators == "-")
+                            valueStack.Push((secondPoppedValue - firstPoppedValue).ToString());
+                    }
+
+                    operatorStack.Pop();
+
+                    if (operatorStack.Peek() == "*" || operatorStack.Peek() == "/")
+                    {
+                        string operators = operatorStack.Pop();
+                        double firstPoppedValue = 0.0;
+                        double secondPoppedValue = 0.0;
+                        Double.TryParse(valueStack.Pop(), out firstPoppedValue);
+                        Double.TryParse(valueStack.Pop(), out secondPoppedValue);
+
+                        if (operators == "*")
+                            valueStack.Push((firstPoppedValue * secondPoppedValue).ToString());
+                        else if (operators == "/")
+                            valueStack.Push((secondPoppedValue / firstPoppedValue).ToString());
+                    }
+
+                }
+
+                previousToken = token;
             }
 
-                return 0;
+            double result = 0.0;
+
+            if(operatorStack.Count == 0)
+            {
+                Double.TryParse(valueStack.Peek(), out result);
+            }
+            else if(operatorStack.Count != 0)
+            {
+                if ((valueStack.Count > 1) && (operatorStack.Peek() == "+" || operatorStack.Peek() == "-"))
+                {
+                    string operators = operatorStack.Pop();
+                    double firstPoppedValue = 0.0;
+                    double secondPoppedValue = 0.0;
+                    Double.TryParse(valueStack.Pop(), out firstPoppedValue);
+                    Double.TryParse(valueStack.Pop(), out secondPoppedValue);
+
+                    if (operators == "+")
+                        result = firstPoppedValue + secondPoppedValue;
+                    else if (operators == "-")
+                        result = secondPoppedValue - firstPoppedValue;
+                }
+            }
+            return result;
         }
 
         /// <summary>
