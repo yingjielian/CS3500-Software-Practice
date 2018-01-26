@@ -17,6 +17,7 @@ namespace Formulas
     /// </summary>
     public class Formula
     {
+        private List<String> list;
         /// <summary>
         /// Creates a Formula from a string that consists of a standard infix expression composed
         /// from non-negative floating-point numbers (using C#-like syntax for double/int literals), 
@@ -39,14 +40,64 @@ namespace Formulas
         /// </summary>
         public Formula(String formula)
         {
-            int a;
-            int b;
+            int openParen = 0;
+            int closeParen = 0;
+            this.list = new List<string>();
 
-            foreach (string any in GetTokens(formula))
-                {
-                string test = any;
-                }
-                
+            string previousToken = null;
+
+            Boolean firstTimeLoop = true;
+
+            foreach (string token in GetTokens(formula))
+            {
+
+                //There must be at least one token.
+                if (token == null)
+                    throw new FormulaFormatException("There must be at least one token.");
+
+                //When reading tokens from left to right, at no point should the number of closing parentheses seen so far be greater than the number of opening parentheses seen so far.
+                if (token == "(")
+                    openParen++;
+                else if (token == ")")
+                    closeParen++;
+
+
+                //The total number of opening parentheses must equal the total number of closing parentheses.
+
+                //The first token of a formula must be a number, a variable, or an opening parenthesis.
+                if (firstTimeLoop)
+                    if ( !Regex.IsMatch(token, @"^[a-zA-Z][0-9a-zA-Z]*$") || token != "(")
+                        throw new FormulaFormatException("Error, formula doesn't begin appropriately.");
+
+
+                //The last token of a formula must be a number, a variable, or a closing parenthesis.
+
+                //Any token that immediately follows an opening parenthesis or an operator must be either a number, a variable, or an opening parenthesis.
+
+                //Any token that immediately follows a number, a variable, or a closing parenthesis must be either an operator or a closing parenthesis.
+                if(previousToken == "(" || Regex.IsMatch(previousToken, @"^[\+\-*/]$"))
+                    if(!Regex.IsMatch(token, @" ^[a-zA-Z][0-9a-zA-Z]*$") || token != "(")
+                        throw new FormulaFormatException("error: unexpected character after an opening parenthesis or operator.");
+
+                if(Regex.IsMatch(previousToken, @"^[a-zA-Z][0-9a-zA-Z]*$") || previousToken == ")")
+                    if(!Regex.IsMatch(token, @"^[\+\-*/]$") || token != ")")
+                        throw new FormulaFormatException("error: unexpected character after a number, a variable, or a closing parenthesis.");
+
+                previousToken = token;
+
+                list.Add(token);
+
+                firstTimeLoop = false;
+            }
+
+            
+            if(!Regex.IsMatch(previousToken, @"^[a-zA-Z][0-9a-zA-Z]*$") || previousToken != ")")
+                throw new FormulaFormatException("Error, formula doesn't end appropriately.");
+
+            if (closeParen != openParen)
+                throw new FormulaFormatException("The total number of opening parentheses must equal the total number of closing parentheses.");
+
+
         }
         /// <summary>
         /// Evaluates this Formula, using the Lookup delegate to determine the values of variables.  (The
@@ -59,7 +110,50 @@ namespace Formulas
         /// </summary>
         public double Evaluate(Lookup lookup)
         {
-            return 0;
+            Stack<string> operatorStack = new Stack<string>();
+            Stack<string> valueStack = new Stack<string>();
+
+            double number = 0.0;
+
+        
+            foreach (string token in list)
+            {
+                if (Double.TryParse(token, out number))
+                { if (operatorStack.Peek() == "*" || operatorStack.Peek() == "/")
+                    {
+                        string operators = operatorStack.Pop();
+                        double poppedValue = 0.0;
+                        Double.TryParse(valueStack.Pop(), out poppedValue);
+
+                        if (operators == "*")
+                            return poppedValue * number;
+                        else if (operators == "/")
+                        {
+                            return poppedValue / number;
+                        }
+
+                    }
+                }
+                else
+                    valueStack.Push(token);
+
+                if(Regex.IsMatch(token, @"^[a-zA-Z][0-9a-zA-Z]*$"))
+                {
+                    try
+                    {
+                        double varabileValue = lookup(token);
+                        valueStack.Push(varabileValue.ToString());
+                    }
+                    catch(UndefinedVariableException e)
+                    {
+                        throw new FormulaEvaluationException("");
+                    }
+                }
+
+
+            }
+
+                return 0;
         }
 
         /// <summary>
