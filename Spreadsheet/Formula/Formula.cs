@@ -79,12 +79,13 @@ namespace Formulas
                     // Any token that immediately follows an opening parenthesis or an operator must 
                     // be either a number, a variable, or an opening parenthesis.
                     if (previousToken == "(" || Regex.IsMatch(previousToken, @"^[\+\-*/]$"))
-                        if (Regex.IsMatch(token, @" ^[a-zA-Z][0-9a-zA-Z]*$") && (token != "(") && !Double.TryParse(token, out checkDigit))
+                        if (!(Regex.IsMatch(token, @"^[a-zA-Z][0-9a-zA-Z]*$") || (token == "(") || Double.TryParse(token, out checkDigit)))
                             throw new FormulaFormatException("error: unexpected character after an opening parenthesis or operator.");
+
                     // Any token that immediately follows a number, a variable, or a closing parenthesis must
                     // be either an operator or a closing parenthesis.
                     if (Regex.IsMatch(previousToken, @"^[a-zA-Z][0-9a-zA-Z]*$") || previousToken == ")" || Double.TryParse(previousToken, out checkDigit))
-                        if (!Regex.IsMatch(token, @"^[\+\-*/]$") && token != ")")
+                        if (!(Regex.IsMatch(token, @"^[\+\-*/]$") || token == ")"))
                             throw new FormulaFormatException("error: unexpected character after a number, a variable, or a closing parenthesis.");
                 }
 
