@@ -79,6 +79,13 @@ namespace FormulaTestCases
             Assert.AreEqual(f.Evaluate(v => 0), 5.0, 1e-6);
         }
 
+        [TestMethod]
+        public void Evaluate6()
+        {
+            Formula f = new Formula("((3+3) / (1+2)) * 3");
+            Assert.AreEqual(f.Evaluate(v => 0), 6.0, 1e-6);
+        }
+
         /// <summary>
         /// The Formula consists of a single variable (x5).  The value of
         /// the Formula depends on the value of x5, which is determined by

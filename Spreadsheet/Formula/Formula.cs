@@ -17,7 +17,9 @@ namespace Formulas
     /// </summary>
     public class Formula
     {
+        // Initializing
         private List<String> list;
+
         /// <summary>
         /// Creates a Formula from a string that consists of a standard infix expression composed
         /// from non-negative floating-point numbers (using C#-like syntax for double/int literals), 
@@ -40,6 +42,7 @@ namespace Formulas
         /// </summary>
         public Formula(String formula)
         {
+            // Initializing needed variables
             int openParen = 0;
             int closeParen = 0;
             double checkDigit = 0.0;
@@ -62,9 +65,6 @@ namespace Formulas
                 else if (token == ")")
                     closeParen++;
 
-
-                //The total number of opening parentheses must equal the total number of closing parentheses.
-
                 //The first token of a formula must be a number, a variable, or an opening parenthesis.
                 if (firstTimeLoop)
                 {
@@ -73,18 +73,16 @@ namespace Formulas
                         throw new FormulaFormatException("Error, formula doesn't begin appropriately.");
                     }
                 }
-                //The last token of a formula must be a number, a variable, or a closing parenthesis.
 
-                //Any token that immediately follows an opening parenthesis or an operator must be either a number, a variable, or an opening parenthesis.
-
-
-                //Any token that immediately follows a number, a variable, or a closing parenthesis must be either an operator or a closing parenthesis.
                 else
                 {
+                    // Any token that immediately follows an opening parenthesis or an operator must 
+                    // be either a number, a variable, or an opening parenthesis.
                     if (previousToken == "(" || Regex.IsMatch(previousToken, @"^[\+\-*/]$"))
-                        if (!Regex.IsMatch(token, @" ^[a-zA-Z][0-9a-zA-Z]*$") && (token != "(") && !Double.TryParse(token, out checkDigit))
+                        if (Regex.IsMatch(token, @" ^[a-zA-Z][0-9a-zA-Z]*$") && (token != "(") && !Double.TryParse(token, out checkDigit))
                             throw new FormulaFormatException("error: unexpected character after an opening parenthesis or operator.");
-
+                    // Any token that immediately follows a number, a variable, or a closing parenthesis must
+                    // be either an operator or a closing parenthesis.
                     if (Regex.IsMatch(previousToken, @"^[a-zA-Z][0-9a-zA-Z]*$") || previousToken == ")" || Double.TryParse(previousToken, out checkDigit))
                         if (!Regex.IsMatch(token, @"^[\+\-*/]$") && token != ")")
                             throw new FormulaFormatException("error: unexpected character after a number, a variable, or a closing parenthesis.");
@@ -95,13 +93,15 @@ namespace Formulas
 
                 list.Add(token);
 
+                // Set boolean flag to decide whether it is the first loop
                 firstTimeLoop = false;
             }
 
-            
-            if(!Regex.IsMatch(previousToken, @"^[a-zA-Z][0-9a-zA-Z]*$") && previousToken != ")" && !Double.TryParse(previousToken, out checkDigit))
+            //The last token of a formula must be a number, a variable, or a closing parenthesis.
+            if (!Regex.IsMatch(previousToken, @"^[a-zA-Z][0-9a-zA-Z]*$") && previousToken != ")" && !Double.TryParse(previousToken, out checkDigit))
                 throw new FormulaFormatException("Error, formula doesn't end appropriately.");
 
+            //The total number of opening parentheses must equal the total number of closing parentheses.
             if (closeParen != openParen)
                 throw new FormulaFormatException("The total number of opening parentheses must equal the total number of closing parentheses.");
 
@@ -118,6 +118,7 @@ namespace Formulas
         /// </summary>
         public double Evaluate(Lookup lookup)
         {
+            // Initializing needed variables
             Stack<string> operatorStack = new Stack<string>();
             Stack<string> valueStack = new Stack<string>();
       
@@ -128,6 +129,10 @@ namespace Formulas
             {
                 if (Double.TryParse(token, out tokenNumber))
                 {
+                    // If* or / is at the top of the operator stack, pop the value stack, 
+                    // pop the operator stack, and apply the popped operator to t and the 
+                    // popped number. Push the result onto the value stack.Otherwise, push 
+                    // t onto the value stack
                     if ((operatorStack.Count != 0) && (operatorStack.Peek() == "*" || operatorStack.Peek() == "/"))
                     {
                         string operators = operatorStack.Pop();
@@ -147,9 +152,9 @@ namespace Formulas
                         valueStack.Push(token);
                     }
                 }
-                
 
-                if(Regex.IsMatch(token, @"^[a-zA-Z][0-9a-zA-Z]*$"))
+                //Proceed as in the previous case, using the looked-up value of t in place of t
+                if (Regex.IsMatch(token, @"^[a-zA-Z][0-9a-zA-Z]*$"))
                 {
                     try
                     {
@@ -164,7 +169,12 @@ namespace Formulas
 
                 if(token == "+" || token == "-")
                 {
-                    if((operatorStack.Count != 0) && (operatorStack.Peek() == "+" || operatorStack.Peek() == "-"))
+                    // If + or - is at the top of the operator stack, 
+                    // pop the value stack twice and the operator stack 
+                    // once.  Apply the popped operator to the popped numbers.
+                    // Push the result onto the value stack.Whether or not you 
+                    // did the first step, push t onto the operator stack
+                    if ((operatorStack.Count != 0) && (operatorStack.Peek() == "+" || operatorStack.Peek() == "-"))
                     {
                         string operators = operatorStack.Pop();
                         double firstPoppedValue = 0.0;
@@ -193,7 +203,17 @@ namespace Formulas
 
                 if(token == ")")
                 {
-                    if (operatorStack.Peek() == "+" || operatorStack.Peek() == "-")
+                    // If + or - is at the top of the operator stack, pop the value 
+                    // stack twice and the operator stack once. Apply the popped 
+                    // operator to the popped numbers. Push the result onto the value 
+                    // stack. 
+                    // Whether or not you did the first step, the top of the operator 
+                    // stack will be a (. Pop it.
+                    // After you have completed the previous step, if *or / is at the
+                    // top of the operator stack, pop the value stack twice and the 
+                    // operator stack once. Apply the popped operator to the popped numbers. 
+                    // Push the result onto the value stack.
+                    if ((valueStack.Count > 1) && (operatorStack.Peek() == "+" || operatorStack.Peek() == "-"))
                     {
                         string operators = operatorStack.Pop();
                         double firstPoppedValue = 0.0;
@@ -207,9 +227,11 @@ namespace Formulas
                             valueStack.Push((secondPoppedValue - firstPoppedValue).ToString());
                     }
 
-                    operatorStack.Pop();
-
-                    if (operatorStack.Peek() == "*" || operatorStack.Peek() == "/")
+                    if((operatorStack.Count > 0) && operatorStack.Peek() == "(")
+                    {
+                        operatorStack.Pop();
+                    }
+                    if ((valueStack.Count > 1) && (operatorStack.Peek() == "*" || operatorStack.Peek() == "/"))
                     {
                         string operators = operatorStack.Pop();
                         double firstPoppedValue = 0.0;
@@ -223,19 +245,30 @@ namespace Formulas
                             valueStack.Push((secondPoppedValue / firstPoppedValue).ToString());
                     }
 
+                    if ((operatorStack.Count > 0) && operatorStack.Peek() == "(")
+                    {
+                        operatorStack.Pop();
+                    }
                 }
 
                 previousToken = token;
             }
 
+            // Store the final result
             double result = 0.0;
 
-            if(operatorStack.Count == 0)
+            // Value stack will contain a single number.  Pop it and 
+            // report as the value of the expression
+            if (operatorStack.Count == 0)
             {
                 Double.TryParse(valueStack.Peek(), out result);
             }
             else if(operatorStack.Count != 0)
             {
+                // There will be exactly one operator on the operator stack, and it 
+                // will be either + or -.There will be exactly two values on the value 
+                // stack.Apply the operator to the two values and report the result as 
+                // the value of the expression.
                 if ((valueStack.Count > 1) && (operatorStack.Peek() == "+" || operatorStack.Peek() == "-"))
                 {
                     string operators = operatorStack.Pop();
@@ -248,6 +281,20 @@ namespace Formulas
                         result = firstPoppedValue + secondPoppedValue;
                     else if (operators == "-")
                         result = secondPoppedValue - firstPoppedValue;
+                }
+
+                if ((valueStack.Count > 1) && (operatorStack.Peek() == "*" || operatorStack.Peek() == "/"))
+                {
+                    string operators = operatorStack.Pop();
+                    double firstPoppedValue = 0.0;
+                    double secondPoppedValue = 0.0;
+                    Double.TryParse(valueStack.Pop(), out firstPoppedValue);
+                    Double.TryParse(valueStack.Pop(), out secondPoppedValue);
+
+                    if (operators == "*")
+                        result = firstPoppedValue * secondPoppedValue;
+                    else if (operators == "/")
+                        result = secondPoppedValue / firstPoppedValue;
                 }
             }
             return result;
