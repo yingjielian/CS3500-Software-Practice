@@ -1,0 +1,43 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 15
+VisualStudioVersion = 15.0.27130.2010
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BoggleService", "BoggleService\BoggleService.csproj", "{27879B14-6F92-4FD5-B48E-723C9F6EE7B7}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BoggleServiceTests", "BoggleServiceTests\BoggleServiceTests.csproj", "{71936E2C-E15E-44DE-ABFF-B69805FAE163}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MyBoggleService", "MyBoggleService\MyBoggleService.csproj", "{896AAEEE-1A00-4689-BC95-992E046E313B}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "SS", "SS", "{764EB74C-AA96-485B-AC51-707BF9230C9A}"
+	ProjectSection(SolutionItems) = preProject
+		..\..\..\..\..\Downloads\spreadsheet-PS11\StringSocket\SS.dll = ..\..\..\..\..\Downloads\spreadsheet-PS11\StringSocket\SS.dll
+		..\..\..\..\..\Downloads\spreadsheet-PS11\StringSocket\SS.XML = ..\..\..\..\..\Downloads\spreadsheet-PS11\StringSocket\SS.XML
+	EndProjectSection
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{27879B14-6F92-4FD5-B48E-723C9F6EE7B7}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{27879B14-6F92-4FD5-B48E-723C9F6EE7B7}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{27879B14-6F92-4FD5-B48E-723C9F6EE7B7}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{27879B14-6F92-4FD5-B48E-723C9F6EE7B7}.Release|Any CPU.Build.0 = Release|Any CPU
+		{71936E2C-E15E-44DE-ABFF-B69805FAE163}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{71936E2C-E15E-44DE-ABFF-B69805FAE163}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{71936E2C-E15E-44DE-ABFF-B69805FAE163}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{71936E2C-E15E-44DE-ABFF-B69805FAE163}.Release|Any CPU.Build.0 = Release|Any CPU
+		{896AAEEE-1A00-4689-BC95-992E046E313B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{896AAEEE-1A00-4689-BC95-992E046E313B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{896AAEEE-1A00-4689-BC95-992E046E313B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{896AAEEE-1A00-4689-BC95-992E046E313B}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {2948AA46-391C-40AA-A047-9B3001A6BE1C}
+	EndGlobalSection
+EndGlobal
